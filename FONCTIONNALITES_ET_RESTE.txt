@@ -1,0 +1,79 @@
+Projet e-commerce – Fonctionnalités présentes et éléments restants
+
+1) Front‑office (client)
+- Accueil avec héros, catégories phares, promotions et métriques.
+- Catalogue avec filtres (catégorie, recherche, prix min/max, en stock), tri (prix ↑/↓, popularité) et pagination.
+- Fiche produit avec images, prix, stock, catégorie, produits liés, ajout wishlist.
+- Recherche instantanée (suggestions) avec saisie et affichage dropdown.
+- Panier persistant par session/utilisateur: ajout, mise à jour quantité, suppression, total.
+- Codes promo: application/retrait, validation par type (pourcentage/fixe) et dates.
+- Checkout: validation adresse, création commande + items, total avec remise, bascule du panier en « ordered ».
+- Compte: tableau de bord, derniers achats, adresses, compteur wishlist.
+
+Références clés
+- Accueil: resources/views/home.blade.php
+- Navigation et recherche: resources/views/layouts/navigation.blade.php:34–47
+- Catalogue: resources/views/catalog/index.blade.php
+- Produit (vue): resources/views/product/show.blade.php
+- Suggestions: app/Http/Controllers/ProductController.php:57–72
+- Panier (contrôleur): app/Http/Controllers/CartController.php:28–48,50–59,61–92
+- Checkout (contrôleur): app/Http/Controllers/CheckoutController.php:28–74
+- Coupon (modèle): app/Models/Coupon.php:17–34
+
+2) Back‑office (admin)
+- Authentification dédiée admin (login) et tableau de bord avec KPIs.
+- Produits: liste, création/édition, upload images, image principale, suppression sécurisée.
+- Catégories: liste, création/édition/suppression, hiérarchie parent/enfants.
+- Clients: liste, fiche client, blocage/déblocage, suppression, reset mot de passe.
+- Commandes: liste, mise à jour statut (pending/confirmed/shipped/delivered/cancelled), tracking (transporteur/code/url), facture.
+- Codes promo: liste, création, suppression.
+- Paramètres: nom du site, logo, couleur primaire, email expéditeur, moyens de paiement, frais de port.
+
+Références clés
+- Routes admin: routes/web.php:120–209
+- Login admin: app/Http/Controllers/Admin/AdminLoginController.php:12–44
+- Middleware admin: app/Http/Middleware/AdminMiddleware.php:9–18
+- Dashboard admin: routes/web.php:140–167
+- Produits admin: app/Http/Controllers/Admin/ProductAdminController.php
+- Catégories admin: app/Http/Controllers/Admin/CategoryAdminController.php
+- Clients admin: app/Http/Controllers/Admin/CustomerAdminController.php
+- Commandes admin: app/Http/Controllers/Admin/OrderAdminController.php:24–59
+- Coupons admin: app/Http/Controllers/Admin/CouponAdminController.php
+- Paramètres admin: app/Http/Controllers/Admin/SettingAdminController.php
+
+3) Sécurité & accès
+- Ségrégation des accès: middleware « admin » pour le back‑office et « user » pour le front protégé.
+- Bloque l’accès des comptes admin aux routes utilisateur et inversement.
+- Sessions uniques: à la connexion, supprime les autres sessions du même utilisateur.
+- Sessions en base de données et configuration cookies/same‑site.
+
+Références clés
+- Aliases middleware: bootstrap/app.php:16–21
+- Middleware user: app/Http/Middleware/UserMiddleware.php:9–26
+- Sessions uniques (user): app/Http/Controllers/Auth/AuthenticatedSessionController.php:24–38
+- Sessions uniques (admin): app/Http/Controllers/Admin/AdminLoginController.php:28–36
+- Config session: config/session.php:21, 89, 185, 202
+
+4) Technique & UX
+- Front en Tailwind CSS + Alpine.js (dropdowns, recherche), build Vite.
+- Dropdown catégories corrigé: fermé par défaut, caché avant init Alpine (x‑cloak).
+- Alerte stock planifiée quotidienne vers l’admin.
+
+Références clés
+- Build: package.json (scripts « dev », « build »)
+- Alpine init: resources/js/app.js:3–7
+- Dropdown navigation: resources/views/layouts/navigation.blade.php:9–26
+- x‑cloak CSS: resources/css/app.css:4–5
+- Tâche planifiée: bootstrap/app.php:24–39
+
+5) Reste à faire (prochaines étapes)
+- Paiement en ligne (Stripe/PayPal) et mise à jour « payment_status=paid ».
+- Décrémenter le stock produit à la confirmation de commande.
+- Calcul frais de port et TVA + récap panier/commande détaillé.
+- Emails clients (confirmation commande, facture, expédition).
+- CRUD adresses côté client (ajout/édition/suppression), réutilisation au checkout.
+- Export CSV des commandes/clients dans l’admin.
+- Historique et limites d’usage des coupons (compteur d’utilisation).
+- Améliorer la recherche (par description, catégorie, prix) et auto‑complétion.
+- Tests automatisés (Feature/Unit) et CI sur les modules critiques (panier, checkout, admin).
+- Ajouter une page pour nos patenariat (nos ne vend pas certains directement on joue un peu le role d'intermediaire ) donc on presente la societe et leur produit sur une page avec leurs  location et article pour chaque patenariat
