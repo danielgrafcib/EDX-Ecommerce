@@ -15,9 +15,15 @@ class PartnerAdminController extends Controller
     {
         $q = request('q');
         $active = request('active');
+        $activeFilter = null;
+        if ($active === '1') {
+            $activeFilter = true;
+        } elseif ($active === '0') {
+            $activeFilter = false;
+        }
         $partners = Partner::withCount(['products','articles'])
             ->when($q, fn($qr) => $qr->where(function($x) use ($q) { $x->where('name','like','%'.$q.'%')->orWhere('location','like','%'.$q.'%'); }))
-            ->when($active !== null, fn($qr) => $qr->where('is_active', (bool)$active))
+            ->when($activeFilter !== null, fn($qr) => $qr->where('is_active', $activeFilter))
             ->latest()->paginate(20);
         return view('admin.partners.index', compact('partners'));
     }

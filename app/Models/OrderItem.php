@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'unit_price'];
+    protected $fillable = ['order_id', 'product_id', 'service_id', 'quantity', 'unit_price'];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
@@ -20,5 +20,10 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
     }
 }

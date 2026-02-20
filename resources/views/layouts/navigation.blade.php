@@ -26,7 +26,9 @@
                     </div>
                 </div>
                 <a href="/catalog" class="text-sm text-neutral-700 hover:text-neutral-900">Boutique</a>
+                <a href="/services" class="text-sm text-neutral-700 hover:text-neutral-900">Les services</a>
                 <a href="/partners" class="text-sm text-neutral-700 hover:text-neutral-900">Partenariats</a>
+                <a href="/enterprises" class="text-sm text-neutral-700 hover:text-neutral-900">Espace entreprises</a>
                 <a href="/account" class="text-sm text-neutral-700 hover:text-neutral-900">Mon compte</a>
                 <a href="/cart" class="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white">Panier</a>
             </div>

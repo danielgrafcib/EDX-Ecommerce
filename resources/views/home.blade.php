@@ -116,7 +116,14 @@
                     <div class="mt-4 space-y-1">
                         <p class="text-xs uppercase tracking-wide text-neutral-500">{{ optional($product->category)->name ?? 'Catégorie' }}</p>
                         <h3 class="text-lg font-semibold text-neutral-900 group-hover:text-sky-600">{{ $product->name }}</h3>
-                        <p class="text-neutral-700">{{ number_format($product->price, 2, ',', ' ') }} €</p>
+                        <p class="text-neutral-700">
+                            @if($product->price_promo !== null)
+                                <span class="text-sm line-through text-neutral-400 mr-2">{{ number_format($product->price, 2, ',', ' ') }} €</span>
+                                <span class="font-semibold text-emerald-600">{{ number_format($product->price_promo, 2, ',', ' ') }} €</span>
+                            @else
+                                {{ number_format($product->price, 2, ',', ' ') }} €
+                            @endif
+                        </p>
                     </div>
                     <div class="mt-4 flex items-center gap-3">
                         <a href="/product/{{ $product->id }}" class="text-sm font-semibold text-neutral-900 hover:text-sky-600">Voir le détail</a>
@@ -209,7 +216,7 @@
                                                     </p>
                                                     @if(!empty($advert->link_url))
                                                         <div class="flex flex-wrap gap-3">
-                                                            <a href="{{ $advert->link_url }}" class="inline-flex items-center px-5 py-2.5 rounded-full bg-white text-sky-900 text-sm font-semibold shadow-sm hover:bg-sky-50">
+                                                            <a href="{{ route('promo.click', $advert->id) }}" class="inline-flex items-center px-5 py-2.5 rounded-full bg-white text-sky-900 text-sm font-semibold shadow-sm hover:bg-sky-50">
                                                                 Découvrir maintenant
                                                                 <span class="ml-2">→</span>
                                                             </a>

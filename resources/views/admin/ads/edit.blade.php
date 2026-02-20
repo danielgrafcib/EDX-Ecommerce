@@ -1,6 +1,17 @@
 @extends('layouts.admin')
 @section('content')
-    <h1 class="text-2xl font-semibold mb-6">Modifier la publicité</h1>
+    <section class="space-y-6">
+    <header class="flex items-center justify-between mb-2">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-semibold text-neutral-50">Modifier la publicité</h1>
+            <p class="text-sm text-neutral-400">
+                Ajustez le visuel, la période et le ciblage en cohérence avec le plan publicitaire de l’entreprise.
+            </p>
+        </div>
+        <a href="{{ route('admin.ad_plans.index') }}" class="text-xs text-neutral-400 hover:text-neutral-200 underline">
+            Consulter les plans
+        </a>
+    </header>
     @if ($errors->any())
         <div class="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             <ul class="list-disc pl-5">
@@ -27,6 +38,42 @@
                 <select form="main-form" name="media_type" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2" required>
                     <option value="image" @selected(old('media_type', $ad->media_type)==='image')>Image</option>
                     <option value="video" @selected(old('media_type', $ad->media_type)==='video')>Vidéo</option>
+                </select>
+            </label>
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <label class="text-sm text-neutral-400 block">Type de publicité
+                <select form="main-form" name="ad_type" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2" required>
+                    <option value="banner" @selected(old('ad_type', $ad->ad_type)==='banner')>Bannière générique</option>
+                    <option value="company" @selected(old('ad_type', $ad->ad_type)==='company')>Publicité entreprise</option>
+                    <option value="service" @selected(old('ad_type', $ad->ad_type)==='service')>Service mis en avant</option>
+                    <option value="shop" @selected(old('ad_type', $ad->ad_type)==='shop')>Boutique sponsorisée</option>
+                    <option value="category_sponsor" @selected(old('ad_type', $ad->ad_type)==='category_sponsor')>Sponsoring de catégorie</option>
+                </select>
+            </label>
+            <label class="text-sm text-neutral-400 block">Modèle de paiement
+                <select form="main-form" name="payment_model" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2">
+                    <option value="">— Non défini —</option>
+                    <option value="daily" @selected(old('payment_model', $ad->payment_model)==='daily')>Par jour</option>
+                    <option value="click" @selected(old('payment_model', $ad->payment_model)==='click')>Par clic</option>
+                    <option value="monthly" @selected(old('payment_model', $ad->payment_model)==='monthly')>Par mois</option>
+                    <option value="subscription_premium" @selected(old('payment_model', $ad->payment_model)==='subscription_premium')>Abonnement Premium</option>
+                </select>
+            </label>
+            <div class="grid gap-2">
+                <label class="text-sm text-neutral-400 block">Début
+                    <input form="main-form" name="start_date" type="datetime-local" value="{{ old('start_date', optional($ad->start_date)->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm">
+                </label>
+                <label class="text-sm text-neutral-400 block">Fin
+                    <input form="main-form" name="end_date" type="datetime-local" value="{{ old('end_date', optional($ad->end_date)->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm">
+                </label>
+            </div>
+            <label class="text-sm text-neutral-400 block">Entreprise liée (optionnel)
+                <select form="main-form" name="enterprise_id" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2" required>
+                    <option value="">— Aucune —</option>
+                    @foreach($enterprises as $e)
+                        <option value="{{ $e->id }}" @selected(old('enterprise_id', $ad->enterprise_id) == $e->id)>{{ $e->name }}</option>
+                    @endforeach
                 </select>
             </label>
         </div>
@@ -67,12 +114,15 @@
                 </form>
             </div>
         </div>
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-4 md:grid-cols-3">
             <label class="text-sm text-neutral-400 block">Lien (optionnel)
                 <input form="main-form" name="link_url" type="url" value="{{ old('link_url', $ad->link_url) }}" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2">
             </label>
             <label class="text-sm text-neutral-400 block">Ordre
                 <input form="main-form" name="sort_order" type="number" value="{{ old('sort_order', $ad->sort_order) }}" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2">
+            </label>
+            <label class="text-sm text-neutral-400 block">Prix (en €)
+                <input form="main-form" name="price" type="number" step="0.01" min="0" value="{{ old('price', $ad->price) }}" class="mt-1 w-full rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2">
             </label>
         </div>
         <label class="inline-flex items-center gap-2 text-sm">
@@ -80,8 +130,9 @@
             Actif
         </label>
         <div>
-            <button form="main-form" class="rounded-xl bg-neutral-200 text-neutral-900 px-4 py-2 text-sm font-semibold">Sauvegarder</button>
-            <a href="{{ route('admin.ads.index') }}" class="ml-2 text-sm text-neutral-400">Retour</a>
+            <button form="main-form" class="rounded-xl bg-sky-600 text-white px-4 py-2 text-sm font-semibold">Sauvegarder</button>
+            <a href="{{ route('admin.ads.index') }}" class="ml-2 text-sm text-neutral-400 hover:text-neutral-200">Retour</a>
         </div>
     </div>
+    </section>
 @endsection

@@ -71,6 +71,9 @@ class CartController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string']
         ]);
+        if (!(bool) (int) \App\Models\Setting::value('feature_codes_promo_enabled', '1')) {
+            return redirect('/cart')->with('status', 'Les codes promo sont désactivés.');
+        }
         $cart = $this->resolveCart($request)->load('items.product');
         $subtotal = $cart->items->sum(fn($i) => $i->quantity * $i->unit_price);
         $coupon = Coupon::where('code', strtoupper(trim($validated['code'])))->first();

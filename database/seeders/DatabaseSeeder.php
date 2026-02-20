@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\AdPlanSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -51,5 +52,7 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $p) {
             Product::firstOrCreate(['slug' => $p['slug']], $p);
         }
+
+        $this->call(AdPlanSeeder::class);
     }
 }

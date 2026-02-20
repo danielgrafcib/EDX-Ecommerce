@@ -1,0 +1,21 @@
+specification: 1.0
+name: Customer Chat System
+description: Système de messagerie entre clients et support
+
+models:
+  Message:
+    table: chat_messages
+    fields:
+      id: bigIncrements
+      user_id: foreignId (users)
+      message: text
+      is_read: boolean (default: false)
+      timestamps: true
+
+endpoints:
+  POST /api/chat/send:
+    summary: Envoyer un message
+    request:
+      user_id: required|integer
+      message: required|string|min:1
+    response: 201 (Message Resource)

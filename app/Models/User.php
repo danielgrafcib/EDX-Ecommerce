@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \App\Traits\HasWallet;
 
     /**
      * The attributes that are mass assignable.
@@ -63,5 +63,17 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function enterprises()
+    {
+        return $this->belongsToMany(Enterprise::class)
+            ->withPivot('role', 'permissions')
+            ->withTimestamps();
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 }

@@ -12,7 +12,13 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @if (file_exists(public_path('build/manifest.json')))
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @else
+            {{-- Vite manifest missing (dev build not generated).
+                 Fallback: no built assets will be loaded to avoid throwing an exception.
+                 Run `npm run build` or `npm run dev` to generate the manifest. --}}
+        @endif
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-white">

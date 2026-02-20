@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Advertisement;
+use App\Models\Enterprise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Support\ImageOptimizer;
@@ -13,19 +14,30 @@ class AdvertisementAdminController extends Controller
     public function index(Request $request)
     {
         $q = $request->get('q');
-        $active = $request->get('active');
+        $active = $request->input('active');
+        $type = $request->get('ad_type');
+        $payment = $request->get('payment_model');
+        $activeFilter = null;
+        if ($active === '1') {
+            $activeFilter = true;
+        } elseif ($active === '0') {
+            $activeFilter = false;
+        }
         $ads = Advertisement::query()
             ->when($q, fn($qr) => $qr->where('title','like','%'.$q.'%'))
-            ->when($active !== null, fn($qr) => $qr->where('is_active', (bool)$active))
+            ->when($activeFilter !== null, fn($qr) => $qr->where('is_active', $activeFilter))
+            ->when($type, fn($qr) => $qr->where('ad_type', $type))
+            ->when($payment, fn($qr) => $qr->where('payment_model', $payment))
             ->orderBy('sort_order')
             ->latest()
             ->paginate(20);
-        return view('admin.ads.index', compact('ads'));
+        return view('admin.ads.index', compact('ads','type','payment'));
     }
 
     public function create()
     {
-        return view('admin.ads.create');
+        $enterprises = Enterprise::orderBy('name')->get();
+        return view('admin.ads.create', compact('enterprises'));
     }
 
     public function store(Request $request)
@@ -38,6 +50,16 @@ class AdvertisementAdminController extends Controller
             'link_url' => ['nullable','url'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable','integer','min:0'],
+            'ad_type' => ['required','in:banner,company,service,shop,category_sponsor'],
+            'payment_model' => ['nullable','in:daily,click,monthly,subscription_premium'],
+            'price' => ['nullable','numeric','min:0'],
+            'start_date' => ['nullable','date'],
+            'end_date' => ['nullable','date','after_or_equal:start_date'],
+            'enterprise_id' => ['nullable','integer','exists:enterprises,id'],
+            'phone_numbers' => ['nullable','array'],
+            'phone_numbers.*' => ['nullable','string'],
+            'gallery' => ['nullable','array'],
+            'gallery.*' => ['nullable','string'],
         ];
         if ($type === 'image') {
             $rules['media'] = ['required','image','mimes:jpeg,jpg,png,webp','max:20480'];
@@ -69,6 +91,14 @@ class AdvertisementAdminController extends Controller
             'link_url' => $validated['link_url'] ?? null,
             'is_active' => $validated['is_active'],
             'sort_order' => $validated['sort_order'],
+            'ad_type' => $validated['ad_type'],
+            'payment_model' => $validated['payment_model'] ?? null,
+            'price' => isset($validated['price']) ? $validated['price'] : null,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'enterprise_id' => $validated['enterprise_id'] ?? null,
+            'phone_numbers_json' => $validated['phone_numbers'] ?? null,
+            'gallery_json' => $validated['gallery'] ?? null,
         ]);
 
         return redirect()->route('admin.ads.index')->with('status','Publicité créée.');
@@ -77,7 +107,8 @@ class AdvertisementAdminController extends Controller
     public function edit(int $id)
     {
         $ad = Advertisement::findOrFail($id);
-        return view('admin.ads.edit', compact('ad'));
+        $enterprises = Enterprise::orderBy('name')->get();
+        return view('admin.ads.edit', compact('ad','enterprises'));
     }
 
     public function update(Request $request, int $id)
@@ -96,6 +127,16 @@ class AdvertisementAdminController extends Controller
             'link_url' => ['nullable','url'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable','integer','min:0'],
+            'ad_type' => ['required','in:banner,company,service,shop,category_sponsor'],
+            'payment_model' => ['nullable','in:daily,click,monthly,subscription_premium'],
+            'price' => ['nullable','numeric','min:0'],
+            'start_date' => ['nullable','date'],
+            'end_date' => ['nullable','date','after_or_equal:start_date'],
+            'enterprise_id' => ['nullable','integer','exists:enterprises,id'],
+            'phone_numbers' => ['nullable','array'],
+            'phone_numbers.*' => ['nullable','string'],
+            'gallery' => ['nullable','array'],
+            'gallery.*' => ['nullable','string'],
         ];
         if ($request->hasFile('media')) {
             if ($type === 'image') {
@@ -137,6 +178,14 @@ class AdvertisementAdminController extends Controller
             'link_url' => $validated['link_url'] ?? null,
             'is_active' => $validated['is_active'],
             'sort_order' => $validated['sort_order'],
+            'ad_type' => $validated['ad_type'],
+            'payment_model' => $validated['payment_model'] ?? null,
+            'price' => isset($validated['price']) ? $validated['price'] : $ad->price,
+            'start_date' => $validated['start_date'] ?? $ad->start_date,
+            'end_date' => $validated['end_date'] ?? $ad->end_date,
+            'enterprise_id' => $validated['enterprise_id'] ?? $ad->enterprise_id,
+            'phone_numbers_json' => $validated['phone_numbers'] ?? $ad->phone_numbers_json,
+            'gallery_json' => $validated['gallery'] ?? $ad->gallery_json,
         ]);
 
         return redirect()->route('admin.ads.edit', $ad->id)->with('status','Publicité mise à jour.');

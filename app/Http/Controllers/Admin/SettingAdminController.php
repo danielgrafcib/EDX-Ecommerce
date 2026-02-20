@@ -19,6 +19,12 @@ class SettingAdminController extends Controller
             'payment_methods' => Setting::value('payment_methods', 'stripe,paypal,cash_on_delivery'),
             'shipping_fee' => Setting::value('shipping_fee', '0'),
             'ads_interval_ms' => Setting::value('ads_interval_ms', '3000'),
+            'feature_codes_promo_enabled' => Setting::value('feature_codes_promo_enabled', '1'),
+            'feature_message_center_enabled' => Setting::value('feature_message_center_enabled', '0'),
+            'feature_2fa_enabled' => Setting::value('feature_2fa_enabled', '0'),
+            'feature_notifications_email_enabled' => Setting::value('feature_notifications_email_enabled', '1'),
+            'feature_notifications_sms_enabled' => Setting::value('feature_notifications_sms_enabled', '0'),
+            'feature_notifications_push_enabled' => Setting::value('feature_notifications_push_enabled', '0'),
         ];
         return view('admin.settings.edit', compact('fields'));
     }
@@ -34,6 +40,12 @@ class SettingAdminController extends Controller
             'payment_methods' => ['nullable', 'string'],
             'shipping_fee' => ['nullable', 'numeric'],
             'ads_interval_ms' => ['nullable', 'integer', 'min:1000'],
+            'feature_codes_promo_enabled' => ['nullable'],
+            'feature_message_center_enabled' => ['nullable'],
+            'feature_2fa_enabled' => ['nullable'],
+            'feature_notifications_email_enabled' => ['nullable'],
+            'feature_notifications_sms_enabled' => ['nullable'],
+            'feature_notifications_push_enabled' => ['nullable'],
         ]);
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->storePublicly('settings', ['disk' => 'public']);
@@ -41,7 +53,18 @@ class SettingAdminController extends Controller
             $disk = Storage::disk('public');
             $validated['logo_url'] = $disk->url($path);
         }
+        $flags = [
+            'feature_codes_promo_enabled' => $request->boolean('feature_codes_promo_enabled') ? '1' : '0',
+            'feature_message_center_enabled' => $request->boolean('feature_message_center_enabled') ? '1' : '0',
+            'feature_2fa_enabled' => $request->boolean('feature_2fa_enabled') ? '1' : '0',
+            'feature_notifications_email_enabled' => $request->boolean('feature_notifications_email_enabled') ? '1' : '0',
+            'feature_notifications_sms_enabled' => $request->boolean('feature_notifications_sms_enabled') ? '1' : '0',
+            'feature_notifications_push_enabled' => $request->boolean('feature_notifications_push_enabled') ? '1' : '0',
+        ];
         foreach ($validated as $k => $v) {
+            Setting::updateOrCreate(['key' => $k], ['value' => $v]);
+        }
+        foreach ($flags as $k => $v) {
             Setting::updateOrCreate(['key' => $k], ['value' => $v]);
         }
         return redirect()->route('admin.settings.edit')->with('status', 'Paramètres mis à jour.');

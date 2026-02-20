@@ -12,11 +12,20 @@ use App\Http\Controllers\Admin\CategoryAdminController;
 use App\Http\Controllers\Admin\CustomerAdminController;
 use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\EnterpriseAdminController;
+use App\Http\Controllers\Admin\MarketAdminController;
+use App\Http\Controllers\Admin\MarketingCampaignAdminController;
+use App\Http\Controllers\Admin\AdPlanAdminController;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\Enterprise;
+use App\Models\Subscription;
+use App\Models\AdPlan;
+use App\Models\Service;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +52,44 @@ Route::get('/', function () {
 
     return view('home', compact('heroProducts', 'categories', 'promotions', 'bestReviews', 'siteMetrics', 'ads', 'adsInterval'));
 });
+
+use App\Http\Controllers\BookingController;
+
+Route::get('/services', function () {
+    $query = Service::query()->where('is_active', true);
+    if (request()->filled('q')) {
+        $term = trim(request('q'));
+        $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', '%'.$term.'%')
+                ->orWhere('description', 'like', '%'.$term.'%');
+        });
+    }
+    if (request()->filled('category')) {
+        $query->where('category', 'like', '%'.request('category').'%');
+    }
+    if (request()->filled('location')) {
+        $query->where('location', 'like', '%'.request('location').'%');
+    }
+    $available = request('available');
+    if ($available === '1' || $available === '0') {
+        $query->where('is_available', $available === '1');
+    }
+    if (request()->filled('price_min')) {
+        $query->where('price', '>=', request()->float('price_min'));
+    }
+    if (request()->filled('price_max')) {
+        $query->where('price', '<=', request()->float('price_max'));
+    }
+    if (request()->filled('rating_min')) {
+        $query->where('rating', '>=', request()->float('rating_min'));
+    }
+    $services = $query->orderBy('plan', 'desc')->orderBy('name')->paginate(12)->withQueryString();
+    return view('services.index', compact('services'));
+});
+
+Route::get('/services/{id}/book', [BookingController::class, 'show'])->name('booking.show');
+Route::get('/services/{id}/availability', [BookingController::class, 'availability'])->name('booking.availability');
+Route::post('/services/{id}/book', [BookingController::class, 'book'])->name('booking.book');
 
 Route::get('/catalog', function () {
     $query = Product::query()->where('is_active', true)->with('images','category');
@@ -227,7 +274,29 @@ Route::prefix('admin')->middleware('admin')->group(function () {
             ->take(5)
             ->get();
         $topProducts->load('product');
-        return view('admin.dashboard', compact('ordersCount','productsCount','customersCount','totalRevenue','recentOrders','lowStockProducts','newCustomers','topProducts'));
+
+        // New dashboard stats
+        $enterprisesCount = Enterprise::count();
+        $activeAdsCount = Advertisement::where('is_active', true)->count();
+        $activeSubscriptionsCount = Subscription::where('status', 'active')->count();
+        $activeSubsCount = $activeSubscriptionsCount; // Alias pour la vue
+        $adPlans = AdPlan::where('is_active', true)->get();
+
+        return view('admin.dashboard', compact(
+            'ordersCount',
+            'productsCount',
+            'customersCount',
+            'totalRevenue',
+            'recentOrders',
+            'lowStockProducts',
+            'newCustomers',
+            'topProducts',
+            'enterprisesCount',
+            'activeAdsCount',
+            'activeSubscriptionsCount',
+            'activeSubsCount',
+            'adPlans'
+        ));
     })->name('admin.dashboard');
 
     // Produits
@@ -302,6 +371,38 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::put('/ads/{id}/media', [\App\Http\Controllers\Admin\AdvertisementAdminController::class, 'updateMedia'])->name('admin.ads.media.update');
     Route::delete('/ads/{id}', [\App\Http\Controllers\Admin\AdvertisementAdminController::class, 'destroy'])->name('admin.ads.destroy');
     Route::put('/ads/{id}/toggle', [\App\Http\Controllers\Admin\AdvertisementAdminController::class, 'toggle'])->name('admin.ads.toggle');
+
+    // Entreprises
+    Route::get('/enterprises', [EnterpriseAdminController::class, 'index'])->name('admin.enterprises.index');
+    Route::get('/enterprises/create', [EnterpriseAdminController::class, 'create'])->name('admin.enterprises.create');
+    Route::post('/enterprises', [EnterpriseAdminController::class, 'store'])->name('admin.enterprises.store');
+    Route::get('/enterprises/{id}/edit', [EnterpriseAdminController::class, 'edit'])->name('admin.enterprises.edit');
+    Route::put('/enterprises/{id}', [EnterpriseAdminController::class, 'update'])->name('admin.enterprises.update');
+    Route::delete('/enterprises/{id}', [EnterpriseAdminController::class, 'destroy'])->name('admin.enterprises.destroy');
+    Route::post('/enterprises/{id}/attach-product', [EnterpriseAdminController::class, 'attachProduct'])->name('admin.enterprises.attach');
+    Route::delete('/enterprises/{id}/products/{productId}', [EnterpriseAdminController::class, 'detachProduct'])->name('admin.enterprises.detach');
+    Route::post('/enterprises/{id}/subscribe', [EnterpriseAdminController::class, 'subscribe'])->name('admin.enterprises.subscribe');
+
+    // Marchés
+    Route::get('/markets', [MarketAdminController::class, 'index'])->name('admin.markets.index');
+    Route::get('/markets/create', [MarketAdminController::class, 'create'])->name('admin.markets.create');
+    Route::post('/markets', [MarketAdminController::class, 'store'])->name('admin.markets.store');
+    Route::get('/markets/{id}/edit', [MarketAdminController::class, 'edit'])->name('admin.markets.edit');
+    Route::put('/markets/{id}', [MarketAdminController::class, 'update'])->name('admin.markets.update');
+    Route::delete('/markets/{id}', [MarketAdminController::class, 'destroy'])->name('admin.markets.destroy');
+
+    // Plans de publicité
+    Route::get('/ad-plans', [AdPlanAdminController::class, 'index'])->name('admin.ad-plans.index');
+    Route::get('/ad-plans/{id}/edit', [AdPlanAdminController::class, 'edit'])->name('admin.ad-plans.edit');
+    Route::put('/ad-plans/{id}', [AdPlanAdminController::class, 'update'])->name('admin.ad-plans.update');
+
+    // Campagnes marketing
+    Route::get('/marketing-campaigns', [MarketingCampaignAdminController::class, 'index'])->name('admin.marketing-campaigns.index');
+    Route::get('/marketing-campaigns/create', [MarketingCampaignAdminController::class, 'create'])->name('admin.marketing-campaigns.create');
+    Route::post('/marketing-campaigns', [MarketingCampaignAdminController::class, 'store'])->name('admin.marketing-campaigns.store');
+    Route::get('/marketing-campaigns/{id}/edit', [MarketingCampaignAdminController::class, 'edit'])->name('admin.marketing-campaigns.edit');
+    Route::put('/marketing-campaigns/{id}', [MarketingCampaignAdminController::class, 'update'])->name('admin.marketing-campaigns.update');
+    Route::delete('/marketing-campaigns/{id}', [MarketingCampaignAdminController::class, 'destroy'])->name('admin.marketing-campaigns.destroy');
 });
 
 /*
@@ -321,3 +422,12 @@ Route::middleware(['auth','user'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+/* Payment Routes */
+Route::post('/payment/initiate/{order}', [PaymentController::class, 'initiate'])->name('payment.initiate')->middleware(['auth']);
+Route::any('/webhook/{provider}', [PaymentController::class, 'handleWebhook'])->name('webhook.payment')->middleware('signed.webhook');
+
+Route::middleware(['auth'])->prefix('enterprise')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\EnterpriseDashboardController::class, 'index'])->name('enterprise.dashboard');
+    Route::get('/{id}/manage', [\App\Http\Controllers\EnterpriseDashboardController::class, 'manage'])->name('enterprise.manage');
+});

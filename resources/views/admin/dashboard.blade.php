@@ -32,6 +32,30 @@
             </div>
         </div>
 
+        <div class="grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs uppercase tracking-wide text-neutral-400">Entreprises</p>
+                    <a href="/admin/enterprises" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Gérer</a>
+                </div>
+                <p class="mt-2 text-2xl font-semibold text-neutral-50">{{ $enterprisesCount }}</p>
+            </div>
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs uppercase tracking-wide text-neutral-400">Publicités actives</p>
+                    <a href="/admin/ads" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Voir</a>
+                </div>
+                <p class="mt-2 text-2xl font-semibold text-neutral-50">{{ $activeAdsCount }}</p>
+            </div>
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs uppercase tracking-wide text-neutral-400">Abonnements actifs</p>
+                    <a href="/admin/enterprises" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Attribuer plans</a>
+                </div>
+                <p class="mt-2 text-2xl font-semibold text-neutral-50">{{ $activeSubsCount }}</p>
+            </div>
+        </div>
+
         <div class="grid gap-6 lg:grid-cols-[1.4fr,0.8fr]">
             <section class="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
                 <div class="flex items-center justify-between mb-3">
@@ -136,5 +160,39 @@
                 </ul>
             </section>
         </div>
+
+        <section class="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-semibold text-neutral-50">Entreprises & Sponsoring</h2>
+                <div class="flex items-center gap-2">
+                    <a href="/admin/enterprises" class="text-xs rounded-lg border border-neutral-700 px-2 py-1">Entreprises</a>
+                    <a href="/admin/ads" class="text-xs rounded-lg border border-neutral-700 px-2 py-1">Publicités</a>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-neutral-300">
+                    <thead class="border-b border-neutral-800 text-neutral-500">
+                        <tr>
+                            <th class="py-2 text-left">Plan</th>
+                            <th class="py-2 text-left">Période</th>
+                            <th class="py-2 text-right">Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($adPlans as $plan)
+                            <tr class="border-b border-neutral-900 last:border-0">
+                                <td class="py-2 text-neutral-100">{{ $plan->name }}</td>
+                                <td class="py-2">{{ $plan->billing_period }}</td>
+                                <td class="py-2 text-right">{{ number_format($plan->price,2,',',' ') }} €</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="py-4 text-center text-neutral-500">Aucun plan actif.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </section>
 @endsection

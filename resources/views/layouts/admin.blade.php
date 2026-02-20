@@ -35,6 +35,12 @@
                 <a href="/admin/categories" class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('admin/categories*') ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-900' }}">
                     <span>🏷️</span><span>Catégories</span>
                 </a>
+                <a href="/admin/markets" class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('admin/markets*') ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-900' }}">
+                    <span>🧭</span><span>Marchés</span>
+                </a>
+                <a href="/admin/enterprises" class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('admin/enterprises*') ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-900' }}">
+                    <span>🏢</span><span>Entreprises</span>
+                </a>
                 <a href="/admin/ads" class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('admin/ads*') ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-900' }}">
                     <span>📣</span><span>Publicités</span>
                 </a>
@@ -78,6 +84,12 @@
     @stack('scripts')
 </body>
 </html>
+
+
+
+
+
+
 
 
 

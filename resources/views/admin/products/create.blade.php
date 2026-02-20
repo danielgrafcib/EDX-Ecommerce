@@ -21,13 +21,31 @@
                     <input name="slug" value="{{ old('slug') }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50" required>
                 </label>
             </div>
-            <div class="grid gap-4 md:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-5">
                 <label class="text-xs font-medium text-neutral-300">
                     Catégorie
                     <select name="category_id" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
                         <option value="">— Aucune —</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="text-xs font-medium text-neutral-300">
+                    Marché
+                    <select name="market_id" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
+                        <option value="">— Aucun —</option>
+                        @foreach($markets as $m)
+                            <option value="{{ $m->id }}" @selected(old('market_id') == $m->id)>{{ $m->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="text-xs font-medium text-neutral-300">
+                    Entreprise
+                    <select name="enterprise_id" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
+                        <option value="">— Aucune —</option>
+                        @foreach($enterprises as $e)
+                            <option value="{{ $e->id }}" @selected(old('enterprise_id') == $e->id)>{{ $e->name }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -41,12 +59,26 @@
                     </select>
                 </label>
                 <label class="text-xs font-medium text-neutral-300">
-                    Prix (€)
+                    Prix normal (€)
                     <input name="price" type="number" step="0.01" value="{{ old('price') }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50" required>
                 </label>
                 <label class="text-xs font-medium text-neutral-300">
                     Stock
                     <input name="stock" type="number" value="{{ old('stock', 0) }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50" required>
+                </label>
+            </div>
+            <div class="grid gap-4 md:grid-cols-3">
+                <label class="text-xs font-medium text-neutral-300">
+                    Prix promotionnel (€)
+                    <input name="price_promo" type="number" step="0.01" value="{{ old('price_promo') }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
+                </label>
+                <label class="text-xs font-medium text-neutral-300">
+                    Prix partenaire (€)
+                    <input name="price_partner" type="number" step="0.01" value="{{ old('price_partner') }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
+                </label>
+                <label class="text-xs font-medium text-neutral-300">
+                    Prix premium (€)
+                    <input name="price_premium" type="number" step="0.01" value="{{ old('price_premium') }}" class="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-50">
                 </label>
             </div>
             <label class="text-xs font-medium text-neutral-300 block">
@@ -69,6 +101,11 @@
         </form>
     </section>
 @endsection
+
+
+
+
+
 
 
 

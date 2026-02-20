@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Partner;
+use App\Models\Market;
+use App\Models\Enterprise;
 use App\Models\ProductImage;
 use App\Models\OrderItem;
 use App\Models\CartItem;
@@ -25,7 +27,9 @@ class ProductAdminController extends Controller
     {
         $categories = Category::orderBy('name')->get();
         $partners = Partner::orderBy('name')->get();
-        return view('admin.products.create', compact('categories','partners'));
+        $markets = Market::orderBy('name')->get();
+        $enterprises = Enterprise::orderBy('name')->get();
+        return view('admin.products.create', compact('categories','partners','markets','enterprises'));
     }
 
     public function store(Request $request)
@@ -35,8 +39,13 @@ class ProductAdminController extends Controller
             'slug' => ['required', 'string', 'unique:products,slug'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'partner_id' => ['nullable', 'integer', 'exists:partners,id'],
+            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+            'enterprise_id' => ['nullable', 'integer', 'exists:enterprises,id'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'price_promo' => ['nullable', 'numeric', 'min:0'],
+            'price_partner' => ['nullable', 'numeric', 'min:0'],
+            'price_premium' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'images' => ['nullable', 'array'],
@@ -65,7 +74,9 @@ class ProductAdminController extends Controller
         $product = Product::findOrFail($id);
         $categories = Category::orderBy('name')->get();
         $partners = Partner::orderBy('name')->get();
-        return view('admin.products.edit', compact('product', 'categories','partners'));
+        $markets = Market::orderBy('name')->get();
+        $enterprises = Enterprise::orderBy('name')->get();
+        return view('admin.products.edit', compact('product', 'categories','partners','markets','enterprises'));
     }
 
     public function update(Request $request, int $id)
@@ -76,8 +87,13 @@ class ProductAdminController extends Controller
             'slug' => ['required', 'string', 'unique:products,slug,'.$product->id],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'partner_id' => ['nullable', 'integer', 'exists:partners,id'],
+            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+            'enterprise_id' => ['nullable', 'integer', 'exists:enterprises,id'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'price_promo' => ['nullable', 'numeric', 'min:0'],
+            'price_partner' => ['nullable', 'numeric', 'min:0'],
+            'price_premium' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'images' => ['nullable', 'array'],

@@ -50,19 +50,26 @@ class LoginRequest extends FormRequest
         }
 
         $user = Auth::user();
+
+        // Sécurité : Refuser la connexion Admin sur l'espace client
         if ($user && ($user->is_admin ?? false)) {
             Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken(); 
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'email' => __('Cette interface est réservée aux comptes utilisateurs.'),
+                'email' => __('Compte administrateur détecté. Veuillez utiliser le portail Admin.'),
             ]);
         }
 
+        // Sécurité : Compte Utilisateur bloqué
         if ($user && ($user->is_blocked ?? false)) {
             Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'email' => __('Votre compte est bloqué. Contactez le support.'),
+                'email' => __('Votre compte est temporairement suspendu pour des raisons de sécurité. Contactez le support.'),
             ]);
         }
 
